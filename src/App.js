@@ -1,50 +1,84 @@
-import React,{useState, useEffect} from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 
 function App() {
-  const [currentSum,setCurrentSum]=useState(0);
-  const [clear,setClear]=useState(false);
+  const[firstNumber,setFirst]=useState([]);
+  const[secondNumber,setSecond]=useState([]);
+  const[numOne,setNumOne]=useState(0);
+  const[numTwo,setNumTwo]=useState(0);
+  const[option,setOption]=useState("");
+  const[equal,setEqual]=useState(false);
+  const[eraser,setEraser]=useState(false);
+  const[result,setResult]=useState(0);
+  const num =[0,1,2,3,4,5,6,7,8,9];
+  const operate =["+","/","*","-"];
 
-  useEffect(()=>{
-    document.querySelector('#result').value="";
-  },[])
-  
-  useEffect(()=>{
-    if(clear)
-    document.querySelector('#result').value="";
-  })
+  const key = num.map((item,key)=> <div key={key} className="number" onClick={()=>option===""?getFirstNumber(item):getSecondNumber(item)}>{item}</div>)
+  const operation = operate.map((item,key)=>
+  <div key={key} className="operate" onClick={()=>setOption(item)}>{item}</div>
+  )
 
-  const Add=(e)=>{
-    e.preventDefault();
-    if(clear) setClear(false);
-    let currentNum=document.querySelector('#num').value
-    if(currentNum=='')
-    return;
-    let sum= currentSum+parseInt(currentNum);
-    setCurrentSum(sum);
-    document.querySelector('#num').value="";
-      
+  //Get first number added to calculator
+  function getFirstNumber(num){
+    setFirst([...firstNumber,num])
   }
 
-  const Clear=(e)=>{
-    e.preventDefault();
-    console.log('sum:', currentSum);
-    document.querySelector('form').reset();
-    setClear(true);
-    setCurrentSum(0);
+  //get second number added to calculator
+  function getSecondNumber(num){
+    setSecond([...secondNumber,num])
   }
+
+  //For convert array to number
+  useEffect(()=>{  
+    setNumOne(+firstNumber.join("") )
+    setNumTwo(+secondNumber.join("") ) 
+  },[firstNumber,secondNumber])
+
+
+  //For calculate 
+  useEffect(()=>{
+    if(option==="+"){
+      setResult(numOne+ numTwo)  
+    }else if(option==="-"){
+      setResult(numOne-numTwo)
+    }else if(option==="*"){
+      setResult(numOne*numTwo)
+    }else{
+      setResult(numOne/numTwo)
+    }
+  },[option,numOne,numTwo])
+
+  //For clean number and go to next operation
+  useEffect(()=>{
+    if(eraser){
+      setOption("");
+      setFirst([]);
+      setSecond([]);
+      setNumTwo(0);
+      setNumOne(0);
+      setResult(0);
+      setEraser(false);
+      setEqual(false)
+    }
+  },[eraser])
+
 
   return (
     <div className="App">
-      <div className="app-title">
-        <h1> Basic Form Calculator</h1>
+      {!equal?(<div className="monitor">{firstNumber}{option}{secondNumber}</div>):
+      (<div className="monitor">{result}</div>)
+      }
+      <div className="calculate-root">
+       <div className="numbers">
+        {key}
+        <div className="eraser" onClick={()=>!eraser?setEraser(true):setEraser(false)}>C</div>
+        </div>
+       <div className="operation">
+         {operation}
+         <div className="operate" onClick={()=>!equal?setEqual(true):setEqual(false)}>=</div>
+       </div>
       </div>
-      <form>
-            <input type="text" id="result" value={currentSum}  readOnly />   
-            <input type="text" id="num" placeholder="enter a number" />
-            <button onClick={Add}>Add</button>
-            <button onClick={Clear}>Clear</button>
-      </form>
+     
     </div>
   );
 }
